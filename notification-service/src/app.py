@@ -74,7 +74,20 @@ def listen_for_notifications():
     while True:
         _, message = r.blpop('notifications')
         notification_data = json.loads(message)
+        save_notification(notification_data)
         emit_socket_event(notification_data)
+
+def save_notification(notification_data):
+    try:
+        new_notification = Notification(
+            video_id=notification_data['video_id'],
+            user_id=notification_data['user_id'],
+            read=False
+        )
+        db.session.add(new_notification)
+        db.session.commit()
+    except Exception as e:
+        print(f"Error in save_notification: {str(e)}")
 
 def emit_socket_event(notification_data):
     socketio.emit('new-notification', {'notification': notification_data}, broadcast=True)
