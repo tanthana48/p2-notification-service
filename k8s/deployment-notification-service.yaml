@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: ghcr.io/tanthana48/p2-notification-service/p2-notification-serivce:latest
+          ports:
+            - containerPort: 8081  
+          env:
+            - name: SECRET_KEY
+              value: "your_secret_key"
+            - name: UMS_DB_NAME
+              value: "p2-database"
+            - name: UMS_DB_USERNAME
+              value: "dev"
+            - name: UMS_DB_PASSWORD
+              value: "devpass"
+            - name: UMS_DB_PORT
+              value: "3306"
+            - name: UMS_DB_IP
+              value: "mariadb.default.svc"
+            - name: PORT
+              value: "8081"
+            - name: REDIS_HOST
+              value: "redis-service.default.svc"
+            - name: REDIS_PORT
+              value: "6379"
+      imagePullSecrets:
+        - name: regcred
+            
+
