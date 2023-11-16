@@ -4,32 +4,37 @@ from redis import Redis
 from flask_cors import CORS
 import os
 import json
-from flask_sqlalchemy import SQLAlchemy
-from database import Notification
+from database import Notification, db
 
-app = Flask(__name__)
-socketio = SocketIO(app)
-CORS(app)
-app.secret_key = os.environ.get("SECRET_KEY", 'your_secret_key')
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-REDIS_PORT = int(os.environ.get('REDIS_PORT', 6379))
+def create_app() -> Flask:
+    app = Flask(__name__)
+    socketio = SocketIO(app)
 
-r = Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
-db = SQLAlchemy(app)
+    CORS(app)
 
-ums_db_name = os.environ.get("UMS_DB_NAME")
-ums_db_username = os.environ.get("UMS_DB_USERNAME")
-ums_db_password = os.environ.get("UMS_DB_PASSWORD")
-ums_db_port = os.environ.get("UMS_DB_PORT", 3306)
-ums_db_ip = os.environ.get("UMS_DB_IP")
-db_uri = f'mysql+pymysql://{ums_db_username}:{ums_db_password}@{ums_db_ip}:{ums_db_port}/{ums_db_name}'
+    app.secret_key = os.environ.get("SECRET_KEY", 'your_secret_key')
+    REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+    REDIS_PORT = int(os.environ.get('REDIS_PORT', 6379))
 
-app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+    r = Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
-db.init_app(app)
+    ums_db_name = os.environ.get("UMS_DB_NAME")
+    ums_db_username = os.environ.get("UMS_DB_USERNAME")
+    ums_db_password = os.environ.get("UMS_DB_PASSWORD")
+    ums_db_port = os.environ.get("UMS_DB_PORT", 3306)
+    ums_db_ip = os.environ.get("UMS_DB_IP")
+    db_uri = f'mysql+pymysql://{ums_db_username}:{ums_db_password}@{ums_db_ip}:{ums_db_port}/{ums_db_name}'
 
-with app.app_context():
-    db.create_all()
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+
+    db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
+    
+    return app, socketio
+
+app, socketio = create_app()
 
 
 @app.route('/noti/notifications/<user_id>', methods=['GET'])
