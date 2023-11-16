@@ -82,4 +82,4 @@ def emit_socket_event(notification_data):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8081))
     socketio.start_background_task(target=listen_for_notifications)
-    socketio.run(app, port=port, debug=True, host='0.0.0.0')
+    socketio.run(app, port=port, debug=True, host='0.0.0.0', allow_unsafe_werkzeug=True)
