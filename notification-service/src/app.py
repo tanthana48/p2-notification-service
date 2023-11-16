@@ -35,7 +35,6 @@ with app.app_context():
 @app.route('/api/notifications/<user_id>', methods=['GET'])
 def get_notifications(user_id):
     notifications = get_unread_notifications(user_id)
-    mark_notifications_as_read(user_id)
     return jsonify([notification.to_dict() for notification in notifications])
 
 def get_unread_notifications(user_id):
@@ -46,6 +45,7 @@ def get_unread_notifications(user_id):
         print(f"Error in get_unread_notifications: {str(e)}")
         return []
 
+@app.route('api/mark-notifications-as-read/<user_id>', methods=['POST'])
 def mark_notifications_as_read(user_id):
     try:
         user_notifications = Notification.query.filter_by(user_id=user_id, read=False).all()
@@ -72,7 +72,7 @@ def listen_for_notifications():
         emit_socket_event(notification_data)
 
 def emit_socket_event(notification_data):
-    pass
+    socketio.emit('new-notification', {'notification': notification_data}, broadcast=True)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8081))
