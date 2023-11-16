@@ -32,9 +32,9 @@ def create_app() -> Flask:
     with app.app_context():
         db.create_all()
     
-    return app, socketio
+    return app, socketio, r
 
-app, socketio = create_app()
+app, socketio, r = create_app()
 
 
 @app.route('/noti/notifications/<user_id>', methods=['GET'])
