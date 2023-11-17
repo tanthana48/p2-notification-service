@@ -59,8 +59,10 @@ def mark_notifications_as_read(user_id):
             notification.read = True
 
         db.session.commit()
+        return jsonify({"message": "Notifications marked as read successfully"})
     except Exception as e:
         print(f"Error in mark_notifications_as_read: {str(e)}")
+        return jsonify({"error": "Failed to mark notifications as read"}), 500
 
 @socketio.on('connect')
 def handle_connect():
