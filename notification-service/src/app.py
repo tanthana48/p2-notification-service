@@ -5,6 +5,8 @@ from flask_cors import CORS
 import os
 import json
 from database import Notification, db
+import logging
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -26,15 +28,17 @@ def create_app() -> Flask:
     db_uri = f'mysql+pymysql://{ums_db_username}:{ums_db_password}@{ums_db_ip}:{ums_db_port}/{ums_db_name}'
 
     app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
-
     db.init_app(app)
 
     with app.app_context():
         db.create_all()
     
-    return app, socketio, r
+    logging.basicConfig(level=logging.DEBUG)
+    log = logging.getLogger(__name__)
 
-app, socketio, r = create_app()
+    return app, socketio, r, log
+
+app, socketio, r, log = create_app()
 
 
 @app.route('/noti/notifications/<user_id>', methods=['GET'])
@@ -76,7 +80,7 @@ def listen_for_notifications():
     while True:
         _, message = r.blpop('notifications')
         notification_data = json.loads(message)
-        print("Received notification:", notification_data)
+        log.debug("Received notification: %s", notification_data)
         save_notification(notification_data)
         emit_socket_event(notification_data)
 
@@ -94,7 +98,7 @@ def save_notification(notification_data):
 
 def emit_socket_event(notification_data):
     socketio.emit('new-notification', {'notification': notification_data})
-    print("Socket event emitted:", notification_data)
+    log.debug("Socket event emitted: %s", notification_data)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8081))
