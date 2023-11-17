@@ -76,6 +76,7 @@ def listen_for_notifications():
     while True:
         _, message = r.blpop('notifications')
         notification_data = json.loads(message)
+        print("Received notification:", notification_data)
         save_notification(notification_data)
         emit_socket_event(notification_data)
 
@@ -93,6 +94,7 @@ def save_notification(notification_data):
 
 def emit_socket_event(notification_data):
     socketio.emit('new-notification', {'notification': notification_data})
+    print("Socket event emitted:", notification_data)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8081))
