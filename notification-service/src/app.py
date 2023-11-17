@@ -8,7 +8,7 @@ from database import Notification, db
 
 def create_app() -> Flask:
     app = Flask(__name__)
-    socketio = SocketIO(app)
+    socketio = SocketIO(app, cors_allowed_origins='*')
 
     CORS(app)
 
