@@ -92,7 +92,7 @@ def save_notification(notification_data):
         print(f"Error in save_notification: {str(e)}")
 
 def emit_socket_event(notification_data):
-    socketio.emit('new-notification', {'notification': notification_data}, broadcast=True)
+    socketio.emit('new-notification', {'notification': notification_data})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8081))
