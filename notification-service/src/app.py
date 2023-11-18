@@ -89,22 +89,23 @@ def listen_for_notifications():
 
 
 def save_notification(notification_data):
-    for notification_dict in notification_data:
-        try:
-            new_notification = Notification(
-                video_id=notification_dict['video_id'],
-                user_id=notification_dict['user_id'],
-                message=notification_dict['message'],
-                read=False
-            )
-            log.debug("%s", notification_dict['video_id'])
-            log.debug("%s", notification_dict['user_id'])
-            log.debug("%s", notification_dict['message'])
-            log.debug("%s", notification_dict)
-            db.session.add(new_notification)
-            db.session.commit()
-        except Exception as e:
-            log.error("Error in save_notification: %s", str(e))
+    with app.app_context():
+        for notification_dict in notification_data:
+            try:
+                new_notification = Notification(
+                    video_id=notification_dict['video_id'],
+                    user_id=notification_dict['user_id'],
+                    message=notification_dict['message'],
+                    read=False
+                )
+                log.debug("%s", notification_dict['video_id'])
+                log.debug("%s", notification_dict['user_id'])
+                log.debug("%s", notification_dict['message'])
+                log.debug("%s", notification_dict)
+                db.session.add(new_notification)
+                db.session.commit()
+            except Exception as e:
+                log.error("Error in save_notification: %s", str(e))
 
 
 def emit_socket_event():
