@@ -54,14 +54,11 @@ def get_unread_notifications(user_id):
         print(f"Error in get_unread_notifications: {str(e)}")
         return []
 
-@app.route('/noti/mark-notifications-as-read/<user_id>', methods=['POST'])
-def mark_notifications_as_read(user_id):
+@app.route('/noti/mark-notifications-as-read/<id>', methods=['POST'])
+def mark_notifications_as_read(id):
     try:
-        user_notifications = Notification.query.filter_by(user_id=user_id, read=False).all()
-
-        for notification in user_notifications:
-            notification.read = True
-
+        user_notifications = Notification.query.get(id)
+        db.session.delete(user_notifications)
         db.session.commit()
         return jsonify({"message": "Notifications marked as read successfully"})
     except Exception as e:
@@ -82,23 +79,24 @@ def listen_for_notifications():
         notification_data = json.loads(message)
         log.debug("Received notification: %s", notification_data)
         save_notification(notification_data)
-        emit_socket_event(notification_data)
+        emit_socket_event()
 
 def save_notification(notification_data):
-    try:
-        new_notification = Notification(
-            video_id=notification_data['video_id'],
-            user_id=notification_data['user_id'],
-            read=False
-        )
-        db.session.add(new_notification)
-        db.session.commit()
-    except Exception as e:
-        print(f"Error in save_notification: {str(e)}")
+    for notification_dict in notification_data:
+        try:
+            new_notification = Notification(
+                video_id=notification_dict['video_id'],
+                user_id=notification_dict['user_id'],
+                read=False
+            )
+            db.session.add(new_notification)
+        except Exception as e:
+            print(f"Error in save_notification: {str(e)}")
+    db.session.commit()
 
-def emit_socket_event(notification_data):
-    socketio.emit('new-notification', {'notification': notification_data})
-    log.debug("Socket event emitted: %s", notification_data)
+def emit_socket_event():
+    socketio.emit('new-notification', "new noti")
+    log.debug("Socket event emitted: %s", "new noti")
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8081))
