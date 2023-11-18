@@ -43,16 +43,13 @@ app, socketio, r, log = create_app()
 
 @app.route('/noti/notifications/<user_id>', methods=['GET'])
 def get_notifications(user_id):
-    notifications = get_unread_notifications(user_id)
-    return jsonify([notification.serialize() for notification in notifications])
-
-def get_unread_notifications(user_id):
-    try:
-        user_notifications = Notification.query.filter_by(user_id=user_id, read=False).all()
-        return user_notifications
-    except Exception as e:
-        print(f"Error in get_unread_notifications: {str(e)}")
-        return []
+    notifications = Notification.query.filter_by(user_id=user_id, read=False).all()
+    notification_list = [ {
+                'id': notification.id,
+                'video_id': notification.video_id,
+                'user_id': notification.user_id
+            } for notification in notifications ]
+    return jsonify({'notifications': notification_list}), 200
 
 @app.route('/noti/mark-notifications-as-read/<id>', methods=['POST'])
 def mark_notifications_as_read(id):
