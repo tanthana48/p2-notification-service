@@ -48,7 +48,8 @@ def get_notifications(user_id):
         {
             'id': notification.id,
             'video_id': notification.video_id,
-            'user_id': notification.user_id
+            'user_id': notification.user_id,
+            'message': notification.message,
         }
         for notification in notifications
     ]
