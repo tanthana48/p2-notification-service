@@ -32,7 +32,7 @@ def create_app() -> Flask:
 
     with app.app_context():
         db.create_all()
-
+    
     logging.basicConfig(level=logging.DEBUG)
     log = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ def get_unread_notifications(user_id):
         user_notifications = Notification.query.filter_by(user_id=user_id, read=False).all()
         return user_notifications
     except Exception as e:
-        log.error(f"Error in get_unread_notifications: {str(e)}")
+        print(f"Error in get_unread_notifications: {str(e)}")
         return []
 
 @app.route('/noti/mark-notifications-as-read/<id>', methods=['POST'])
@@ -62,16 +62,16 @@ def mark_notifications_as_read(id):
         db.session.commit()
         return jsonify({"message": "Notifications marked as read successfully"})
     except Exception as e:
-        log.error(f"Error in mark_notifications_as_read: {str(e)}")
+        print(f"Error in mark_notifications_as_read: {str(e)}")
         return jsonify({"error": "Failed to mark notifications as read"}), 500
 
 @socketio.on('connect')
 def handle_connect():
-    log.debug('Client connected')
+    print('Client connected')
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    log.debug('Client disconnected')
+    print('Client disconnected')
 
 def listen_for_notifications():
     while True:
@@ -89,11 +89,11 @@ def save_notification(notification_data):
                 user_id=notification_dict['user_id'],
                 read=False
             )
+            log.debug("%s", notification_dict)
             db.session.add(new_notification)
             db.session.commit()
-            log.debug("Saved notification: %s", notification_dict)
         except Exception as e:
-            log.error(f"Error in save_notification: {str(e)}")
+            print(f"Error in save_notification: {str(e)}")
 
 def emit_socket_event():
     socketio.emit('new-notification', "new noti")
