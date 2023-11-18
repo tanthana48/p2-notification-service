@@ -96,12 +96,13 @@ def save_notification(notification_data):
                 user_id=notification_dict['user_id'],
                 read=False
             )
+            log.debug("%s", notification_dict['video_id'])
+            log.debug("%s", notification_dict['user_id'])
             log.debug("%s", notification_dict)
             db.session.add(new_notification)
             db.session.commit()
         except Exception as e:
             log.error("Error in save_notification: %s", str(e))
-            db.session.rollback()
 
 
 def emit_socket_event():
