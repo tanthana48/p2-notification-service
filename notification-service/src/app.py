@@ -90,9 +90,9 @@ def save_notification(notification_data):
                 read=False
             )
             db.session.add(new_notification)
+            db.session.commit()
         except Exception as e:
             print(f"Error in save_notification: {str(e)}")
-    db.session.commit()
 
 def emit_socket_event():
     socketio.emit('new-notification', "new noti")
