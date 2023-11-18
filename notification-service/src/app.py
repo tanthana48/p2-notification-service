@@ -44,13 +44,18 @@ app, socketio, r, log = create_app()
 @app.route('/noti/notifications/<user_id>', methods=['GET'])
 def get_notifications(user_id):
     notifications = Notification.query.filter_by(user_id=user_id, read=False).all()
-    notification_list = [ {
-                'id': notification.id,
-                'video_id': notification.video_id,
-                'user_id': notification.user_id
-            } for notification in notifications ]
+    notification_list = [
+        {
+            'id': notification.id,
+            'video_id': notification.video_id,
+            'user_id': notification.user_id
+        }
+        for notification in notifications
+    ]
+    log.debug('Fetched notifications: %s', notifications)
     log.debug('Notification list: %s', notification_list)
     return jsonify({'notifications': notification_list}), 200
+
 
 @app.route('/noti/mark-notifications-as-read/<id>', methods=['POST'])
 def mark_notifications_as_read(id):
@@ -74,10 +79,14 @@ def handle_disconnect():
 def listen_for_notifications():
     while True:
         _, message = r.blpop('notifications')
-        notification_data = json.loads(message)
-        log.debug("Received notification: %s", notification_data)
-        save_notification(notification_data)
-        emit_socket_event()
+        try:
+            notification_data = json.loads(message)
+            log.debug("Received notification: %s", notification_data)
+            save_notification(notification_data)
+            emit_socket_event()
+        except json.JSONDecodeError as e:
+            log.error("Error decoding JSON from Redis: %s", str(e))
+
 
 def save_notification(notification_data):
     for notification_dict in notification_data:
@@ -91,7 +100,9 @@ def save_notification(notification_data):
             db.session.add(new_notification)
             db.session.commit()
         except Exception as e:
-            print(f"Error in save_notification: {str(e)}")
+            log.error("Error in save_notification: %s", str(e))
+            db.session.rollback()
+
 
 def emit_socket_event():
     socketio.emit('new-notification', "new noti")
