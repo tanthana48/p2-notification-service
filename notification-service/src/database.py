@@ -8,3 +8,10 @@ class Notification(db.Model):
     user_id = db.Column(db.Integer, nullable=False)
     read = db.Column(db.Boolean , nullable=False, default=False)
     
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'video_id': self.video_id,
+            'user_id': self.user_id,
+            'read': self.read
+        }
