@@ -94,10 +94,12 @@ def save_notification(notification_data):
             new_notification = Notification(
                 video_id=notification_dict['video_id'],
                 user_id=notification_dict['user_id'],
+                message=notification_dict['message'],
                 read=False
             )
             log.debug("%s", notification_dict['video_id'])
             log.debug("%s", notification_dict['user_id'])
+            log.debug("%s", notification_dict['message'])
             log.debug("%s", notification_dict)
             db.session.add(new_notification)
             db.session.commit()
