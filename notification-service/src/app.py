@@ -49,6 +49,7 @@ def get_notifications(user_id):
                 'video_id': notification.video_id,
                 'user_id': notification.user_id
             } for notification in notifications ]
+    log.debug('Notification list: %s', notification_list)
     return jsonify({'notifications': notification_list}), 200
 
 @app.route('/noti/mark-notifications-as-read/<id>', methods=['POST'])
