@@ -44,7 +44,7 @@ app, socketio, r, log = create_app()
 @app.route('/noti/notifications/<user_id>', methods=['GET'])
 def get_notifications(user_id):
     notifications = get_unread_notifications(user_id)
-    return jsonify([notification.to_dict() for notification in notifications])
+    return jsonify([notification.serialize() for notification in notifications])
 
 def get_unread_notifications(user_id):
     try:
